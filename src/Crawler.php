@@ -35,6 +35,13 @@ class Crawler
     ];
 
     /**
+     * Curl once option
+     *
+     * @var array
+     */
+    protected static $onceOpt = [];
+
+    /**
      * Get curl default option
      *
      * @return array $opt
@@ -88,13 +95,13 @@ class Crawler
     }
 
     /**
-     * 透過設定檔 執行爬蟲
+     * Run curl via config
      *
      * @param  CrawlerConfig $conf
      * @throws Exception
      * @return void
      */
-    public static function run(CrawlerConfig $conf)
+    public static function run(CrawlerConfig $conf, string $downloadType, string $fileName)
     {
         self::setCurlOpt($conf->getCurlOpt());
         self::setCookie($conf->getCookies());
@@ -112,12 +119,54 @@ class Crawler
             case 'delete':
                 $result = self::delete($conf->getUrl(), $conf->getData());
                 break;
+            case 'getDownload':
+                $result = self::download(
+                    $conf->getUrl(), $conf->getData(), 'GET', $conf->getFilePath()
+                );
+                break;
+            case 'postDownload':
+                $result = self::download(
+                    $conf->getUrl(), $conf->getData(), 'POST', $conf->getFilePath()
+                );
+                break;
             default:
                 throw new Exception('Request type is not found', 400);
                 break;
         }
 
         return $result;
+    }
+
+    /**
+     * Curl download file
+     *
+     * @param string $url
+     * @param array $data
+     * @param string $method
+     * @param string $filePath
+     * @return string $filePath
+     */
+    public static function download(string $url, array $data, string $method = 'GET', string $filePath = null)
+    {
+        // Set default temp file path
+        $filePath = $filePath ?? tempnam(sys_get_temp_dir(), 'NueipCrawlerTmpFile');
+
+        // Open file
+        $fp = fopen($filePath, 'w');
+
+        // Extra curlOpt
+        self::$onceOpt = [
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_FILE => $fp,
+        ];
+
+        if ($method === 'GET') {
+            self::get($url, $data);
+        } else {
+            self::post($url, $data);
+        }
+
+        return $filePath;
     }
 
     /**

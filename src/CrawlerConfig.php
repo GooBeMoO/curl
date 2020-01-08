@@ -24,6 +24,7 @@ class CrawlerConfig
         'data' => [],
         'cookies' => [],
         'curlOpt' => [],
+        'filePath' => '',
     ];
 
     /**
@@ -36,6 +37,8 @@ class CrawlerConfig
         'post' => '',
         'put' => '',
         'delete' => '',
+        'getDownload' => '',
+        'postDownload' => '',
     ];
 
     /**
@@ -94,7 +97,6 @@ class CrawlerConfig
      */
     public function setType(string $type)
     {
-        $type = strtolower($type);
         $this->config['type'] = isset($this->methodList[$type]) ? $type : null;
     }
 
@@ -129,6 +131,17 @@ class CrawlerConfig
     public function setCurlOpt(array $curlOpt)
     {
         $this->config['curlOpt'] = $curlOpt;
+    }
+
+    /**
+     * Set FilePath
+     *
+     * @param string $filePath
+     * @return void
+     */
+    public function setFilePath(string $filePath)
+    {
+        $this->config['filePath'] = $filePath;
     }
 
     /**
@@ -195,5 +208,15 @@ class CrawlerConfig
     public function getCurlOpt()
     {
         return $this->config['curlOpt'];
+    }
+
+    /**
+     * Get file path
+     *
+     * @return string
+     */
+    public function getFilePath()
+    {
+        return $this->config['filePath'];
     }
 }
